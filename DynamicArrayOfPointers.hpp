@@ -27,21 +27,21 @@ class DynamicArrayOfPointers
 	size_t _count = 0;
 
 	void free();
-	void copyFrom(const DynamicArrayOfPointers& other);
+	void copyFrom(const DynamicArrayOfPointers<A>& other);
 	void resize(size_t newCap);
 
-	void moveFrom(DynamicArrayOfPointers&& other);
+	void moveFrom(DynamicArrayOfPointers<A>&& other);
 
 	int getFirstFreeIndex() const; //Better solution will be to store a variable with the first free index
 public:
 	DynamicArrayOfPointers();
 	DynamicArrayOfPointers(size_t capacity);
-	DynamicArrayOfPointers(const DynamicArrayOfPointers& other);
-	DynamicArrayOfPointers& operator=(const DynamicArrayOfPointers& other);
+	DynamicArrayOfPointers(const DynamicArrayOfPointers<A>& other);
+	DynamicArrayOfPointers& operator=(const DynamicArrayOfPointers<A>& other);
 	~DynamicArrayOfPointers();
 
-	DynamicArrayOfPointers(DynamicArrayOfPointers&& other) noexcept;
-	DynamicArrayOfPointers& operator=(DynamicArrayOfPointers&& other) noexcept;
+	DynamicArrayOfPointers(DynamicArrayOfPointers<A>&& other) noexcept;
+	DynamicArrayOfPointers& operator=(DynamicArrayOfPointers<A>&& other) noexcept;
 
 	void addAtFirstFreeIndex(A& current);
 	void addAtFirstFreeIndex(A&& obj);
@@ -66,7 +66,7 @@ void DynamicArrayOfPointers<A>::free()
 }
 
 template <class A>
-void DynamicArrayOfPointers<A>::copyFrom(const DynamicArrayOfPointers& other)
+void DynamicArrayOfPointers<A>::copyFrom(const DynamicArrayOfPointers<A>& other)
 {
 	_count = other._count;
 	_capacity = other._capacity;
@@ -99,7 +99,7 @@ void DynamicArrayOfPointers<A>::resize(size_t newCap)
 }
 
 template <class A>
-void DynamicArrayOfPointers<A>::moveFrom(DynamicArrayOfPointers&& other)
+void DynamicArrayOfPointers<A>::moveFrom(DynamicArrayOfPointers<A>&& other)
 {
 	_data = other._data;
 	other._data = nullptr;
@@ -134,13 +134,13 @@ DynamicArrayOfPointers<A>::DynamicArrayOfPointers(size_t capacity)
 }
 
 template <class A>
-DynamicArrayOfPointers<A>::DynamicArrayOfPointers(const DynamicArrayOfPointers& other)
+DynamicArrayOfPointers<A>::DynamicArrayOfPointers(const DynamicArrayOfPointers<A>& other)
 {
 	copyFrom(other);
 }
 
 template <class A>
-DynamicArrayOfPointers<A>& DynamicArrayOfPointers<A>::operator=(const DynamicArrayOfPointers& other)
+DynamicArrayOfPointers<A>& DynamicArrayOfPointers<A>::operator=(const DynamicArrayOfPointers<A>& other)
 {
 	if (this != &other)
 	{
@@ -157,13 +157,13 @@ DynamicArrayOfPointers<A>::~DynamicArrayOfPointers()
 }
 
 template <class A>
-DynamicArrayOfPointers<A>::DynamicArrayOfPointers(DynamicArrayOfPointers&& other) noexcept
+DynamicArrayOfPointers<A>::DynamicArrayOfPointers(DynamicArrayOfPointers<A>&& other) noexcept
 {
 	moveFrom(std::move(other));
 }
 
 template <class A>
-DynamicArrayOfPointers<A>& DynamicArrayOfPointers<A>::operator=(DynamicArrayOfPointers&& other) noexcept
+DynamicArrayOfPointers<A>& DynamicArrayOfPointers<A>::operator=(DynamicArrayOfPointers<A>&& other) noexcept
 {
 	if (this != &other)
 	{
