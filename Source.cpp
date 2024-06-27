@@ -10,21 +10,21 @@
 namespace
 {
 
-	static constexpr int MAX_LINE_SIZE = 1024;
+	 constexpr int MAX_SIZE = 100;
 
-	static bool isNumber(char ch)
+	 bool isNumber(char ch)
 	{
 		return ch >= '0' && ch <= '9';
 	}
 
-	static bool strToTm(const MyString& str, const MyString& format, std::tm& tm)
+	 bool strToTm(const MyString& str, const MyString& format, std::tm& tm)
 	{
 		std::istringstream ss(str.c_str());
 		ss >> std::get_time(&tm, format.c_str());
 		return !(ss.fail());
 	}
 
-	static int charToInt(const char* str)
+	 int charToInt(const char* str)
 	{
 		if (str == nullptr || *str == '\0')
 		{
@@ -51,7 +51,7 @@ namespace
 	}
 }
 
-void executeCommand(const System& system, const MyString& command, std::stringstream& ss)
+void executeCommand( System& system, const MyString& command, std::stringstream& ss)
 {
 	if (command == "register")
 	{
@@ -78,18 +78,26 @@ void executeCommand(const System& system, const MyString& command, std::stringst
 	else if (command == "add-task")
 	{
 		MyString name;
-		MyString nextArg;
+		char nextArg[MAX_SIZE];
 
-		ss >> name >> nextArg;
+		ss >> name;
+		ss.ignore();
+		ss.getline(nextArg, MAX_SIZE);
 
 		if (isNumber(nextArg[0]))
 		{
 			MyString format = "%Y-%m-%d %H:%M:%S";
 			std::tm tm = {};
-			if (strToTm(nextArg, format, tm))
+
+			std::stringstream sstream(nextArg);
+			MyString date;
+			sstream >> date;
+
+			if (strToTm(date, format, tm))
 			{
-				MyString description;
-				ss >> description;
+				char description[MAX_SIZE];
+				sstream.ignore();
+				sstream.getline(description, MAX_SIZE);
 				AddTaskCommand commandToExecute(system, name, tm, description);
 				commandToExecute.execute();
 			}
@@ -100,15 +108,8 @@ void executeCommand(const System& system, const MyString& command, std::stringst
 		}
 		else
 		{
-			if (isNumber(nextArg[0]))
-			{
-				std::cout << "Descriptions shouldn't begin with a number." << std::endl;
-			}
-			else
-			{
-				AddTaskCommand commandToExecute(system, name, nextArg);
-				commandToExecute.execute();
-			}
+			AddTaskCommand commandToExecute(system, name, nextArg);
+			commandToExecute.execute();
 		}
 	}
 	else if (command == "update-task-name")
@@ -130,8 +131,10 @@ void executeCommand(const System& system, const MyString& command, std::stringst
 	else if (command == "update-task-description")
 	{
 		int id;
-		MyString desc;
-		ss >> id >> desc;
+		char desc[MAX_SIZE];
+		ss >> id;
+		ss.ignore();
+		ss.getline(desc, MAX_SIZE);
 
 		UpdateTaskDescriptionCommand commandToExecute(system, id, desc);
 		commandToExecute.execute();
@@ -236,15 +239,64 @@ void executeCommand(const System& system, const MyString& command, std::stringst
 		LogoutCommand command(system);
 		command.execute();
 	}
+	else if(command == "add-collaboration")
+	{
+		MyString name;
+		ss >> name;
+		AddCollaborationCommand command(system, name);
+		command.execute();
+	}
+	else if(command == "delete-collaboration")
+	{
+		MyString name;
+		ss >> name;
+
+		DeleteCollaborationCommand command(system, name);
+		command.execute();
+	}
+	else if(command == "list-collaborations")
+	{
+		listCollaborationsCommand command(system);
+		command.execute();
+	}
+	else if(command == "add-user")
+	{
+		MyString collabName;
+		MyString userName;
+
+		ss >> collabName >> userName;
+		AddUserCommand command(system, collabName, userName);
+		command.execute();
+	}
+	else if(command == "assign-task")
+	{
+		MyString collabName;
+		MyString username;
+		MyString name;
+		MyString due_date;
+		char description[MAX_SIZE];
+
+		ss >> collabName >> username >> name >> due_date;
+		ss.ignore();
+		ss.getline(description, MAX_SIZE);
+
+		MyString format = "%Y-%m-%d %H:%M:%S";
+		std::tm tm = {};
+
+		if (strToTm(due_date, format, tm))
+		{
+			AssignTaskCommand command(system, collabName, username, name, tm, description);
+			command.execute();
+		}
+		else
+		{
+			std::cout << "Invalid arguments. Try again. Input a valid due date.";
+		}
+	}
 	else
 	{
 		std::cout << "Invalid command. Try again." << std::endl;
 	}
-}
-
-void readDatabaseFromFile(System& system)
-{
-	system.loadDataFromFile();
 }
 
 int main()
@@ -252,21 +304,21 @@ int main()
 	try
 	{
 		System system;
-		readDatabaseFromFile(system);
+		//system.loadDataFromFile();
 
 		while (true)
 		{
-			char line[MAX_LINE_SIZE];
+			char line[MAX_SIZE];
 
 			std::cout << "Enter command: ";
-			std::cin.getline(line, MAX_LINE_SIZE);
+			std::cin.getline(line, MAX_SIZE);
 
 			std::stringstream ss(line);
-			MyString command;
+			char command[MAX_SIZE];
 
-			ss.getline(&command[0], MAX_LINE_SIZE, ' ');
+			ss.getline(command, MAX_SIZE, ' ');
 
-			if (command == "exit")
+			if (strcmp(command, "exit") == 0)
 			{
 				break;
 			}
