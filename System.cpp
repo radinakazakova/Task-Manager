@@ -181,6 +181,11 @@ void System::loadDataFromFile()
 
 void System::registerUser(const MyString& username, const MyString& password)
 {
+	if(password.getLength() == 0 || username.getLength() == 0)
+	{
+		std::cout << "Please input password and/or username." << std::endl;
+	}
+
 	if (findUserIdx(username) == -1)
 	{
 		int userIndex = allUsers.getSize();
@@ -200,16 +205,18 @@ void System::loginUser(const MyString& username, const MyString& password)
 
 	if (userIdx != -1 && allUsers[userIdx].checkPassword(password))
 	{
-		loggedInUser = &allUsers[userIdx];
-
 		std::time_t currTime = std::time(nullptr);
+
 		if (localtime_s(&loggedInTime, &currTime) != 0)
 		{
-			std::cerr << "Failed to get loggedInTime" << std::endl; //???
+			std::cerr << "Failed to get loggedInTime" << std::endl; 
 		}
-		else {
+		else 
+		{
+			loggedInUser = &allUsers[userIdx];
 			loggedInUser->updateTaskStatus(loggedInTime);
 			loggedInUser->updateDashboard(loggedInTime);
+			std::cout << "Login successful" << std::endl;
 		}
 	}
 	else
@@ -220,6 +227,12 @@ void System::loginUser(const MyString& username, const MyString& password)
 
 void System::addTask(const MyString& name, const std::tm& due_date, const MyString& description)
 {
+	if(!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	if (loggedInUser->taskExists(name, due_date))
 	{
 		std::cout << "Task with that name and due date already exists" << std::endl;
@@ -230,11 +243,18 @@ void System::addTask(const MyString& name, const std::tm& due_date, const MyStri
 		allTasks.pushBack(Task(name, due_date, description, indexNewTask));
 	
 		loggedInUser->addTask(allTasks[indexNewTask]);
+		std::cout << "Task added successfully!" << std::endl;
 	}
 }
 
 void System::addTask(const MyString& name, const MyString& description)
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	if (loggedInUser->taskExists(name))
 	{
 		std::cout << "Task with that name and due date already exists" << std::endl;
@@ -245,36 +265,74 @@ void System::addTask(const MyString& name, const MyString& description)
 		allTasks.pushBack(Task(name, description, indexNewTask));
 
 		loggedInUser->addTask(allTasks[indexNewTask]);
+		std::cout << "Task added successfully!" << std::endl;
+
 	}
 }
 
 void System::updateTaskName(int id, const MyString& name)
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	loggedInUser->updateTaskName(id, name);
 }
 
 void System::startTask(int id)
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	loggedInUser->startTask(id);
 }
 
 void System::updateTaskDescription(int id, const MyString& desc)
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	loggedInUser->updateTaskDescription(id, desc);
 }
 
 void System::removeTaskFromDashboard(int id)
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	loggedInUser->removeTaskFromDashboard(id);
 }
 
 void System::addTaskToDashboard(int id)
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	loggedInUser->addTaskToDashboard(id);
 }
 
 void System::deleteTask(int id)
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	if(loggedInUser->deleteTask(id))
 	{
 		int index = findTask(id);
@@ -282,64 +340,126 @@ void System::deleteTask(int id)
 		if(index != -1)
 		{
 			allTasks.popAt(index);
+			std::cout << "Task deleted!" << std::endl;
 		}
 	}
 }
 
 void System::getTask(const MyString& name) const
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	loggedInUser->getTask(name);
 
 }
 
 void System::getTask(int id) const
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	loggedInUser->getTask(id);
 }
 
 void System::listTasks(const std::tm& date) const
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	loggedInUser->listTasks(date);
 }
 
 void System::listTasks() const
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	loggedInUser->listTasks();
 
 }
 
 void System::listCompletedTasks() const
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	loggedInUser->listCompletedTasks();
 
 }
 
 void System::listDashboard() const
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	loggedInUser->listDashboard();
 
 }
 
 void System::finishTask(int id)
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	loggedInUser->finishTask(id);
 	loggedInUser->updateDashboard(loggedInTime);
 }
 
 void System::logout()  
 {
+	if (!loggedInUser)
+	{
+		std::cout << "You are already logged out." << std::endl;
+		return;
+	}
+
 	loggedInUser = nullptr;
 	std::cout << "Logged out successfully!" << std::endl;
 }
 
 void System::addCollaboration(const MyString& name)
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	int index = allCollaborations.getSize();
 	allCollaborations.pushBack(Collaboration(index, name, loggedInUser));
+	std::cout << "Collaboration added successfully!" << std::endl;
 }
 
 void System::deleteCollaboration(const MyString& name)
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	int index = findCollaboration(name);
 
 	if (index != -1)
@@ -349,6 +469,7 @@ void System::deleteCollaboration(const MyString& name)
 			allCollaborations[index].deleteCollaboration();
 			deleteTasksFromCollaboration(allCollaborations[index]);
 			allCollaborations.popAt(index);
+			std::cout << "Collaboration deleted!" << std::endl;
 		}
 		else
 		{
@@ -363,19 +484,33 @@ void System::deleteCollaboration(const MyString& name)
 
 void System::listCollaborations() const
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	int size = allCollaborations.getSize();
 
 	for(int i = 0; i < size; i++)
 	{
 		const Collaboration& currCollab = allCollaborations[i];
 
-		std::cout << currCollab.getName() << std::endl;
-		
+		if(currCollab.userIsInCollaboration(*loggedInUser))
+		{
+			std::cout << currCollab.getName() << std::endl;
+		}
 	}
 }
 
 void System::addUser(const MyString& collaborationName, const MyString& username)
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	int indexCollab = findCollaboration(collaborationName);
 	int indexUser = findUserIdx(username);
 
@@ -400,16 +535,23 @@ void System::addUser(const MyString& collaborationName, const MyString& username
 void System::assignTask(const MyString& collaborationName, const MyString& username, const MyString& taskName,
 						const std::tm& due_date, const MyString& desc)
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	int collabIndex = findCollaboration(collaborationName);
 	int assigneeIndex = findUserIdx(username);
 
 	Collaboration& collaboration = allCollaborations[collabIndex];
 
-	if(collabIndex != -1 && assigneeIndex != -1 && collaboration.userIsInCollaboration(allUsers[assigneeIndex]) && collaboration.userIsInCollaboration(*loggedInUser))
+	if(collabIndex != -1 && assigneeIndex != -1 &&  collaboration.userIsInCollaboration(*loggedInUser)&& collaboration.userIsInCollaboration(allUsers[assigneeIndex]))
 	{
 		int indexTask = allTasks.getSize();
 		allTasks.pushBack(Task(taskName, due_date, desc, indexTask));
 		collaboration.addTask(allUsers[assigneeIndex], allTasks[indexTask]);
+		std::cout << "Task assigned successfully!" << std::endl;
 	}
 	else
 	{
@@ -419,13 +561,22 @@ void System::assignTask(const MyString& collaborationName, const MyString& usern
 
 void System::listTasks(const MyString& collaborationName) const
 {
+	if (!loggedInUser)
+	{
+		std::cout << "Please log in." << std::endl;
+		return;
+	}
+
 	int index = findCollaboration(collaborationName);
 
-	const Collaboration& collaboration = allCollaborations[index];
-
-	if(index != -1 && collaboration.userIsInCollaboration(*loggedInUser))
+	if(index != -1 && allCollaborations[index].userIsInCollaboration(*loggedInUser))
 	{
+		const Collaboration& collaboration = allCollaborations[index];
 		collaboration.listTasks();
+	}
+	else
+	{
+		std::cout << "Couldn't find collaboration with that name" << std::endl;
 	}
 }
 
