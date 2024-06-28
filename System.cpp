@@ -19,7 +19,7 @@ int System::findUserIdx(const MyString& username) const
 
 int System::findTask(int id) const
 {
-	if(id == -1)
+	if (id == -1)
 	{
 		return -1;
 	}
@@ -82,7 +82,7 @@ void System::saveDataToFile() const
 void System::saveDataToFile(std::ofstream& ofs) const
 {
 	int tasksCount = allTasks.getSize();
-	ofs.write(reinterpret_cast<const char*>(tasksCount), sizeof(tasksCount));
+	ofs.write(reinterpret_cast<const char*>(&tasksCount), sizeof(tasksCount));
 
 	for (int i = 0; i < tasksCount; i++)
 	{
@@ -110,72 +110,107 @@ void System::loadDataFromFile(std::ifstream& ifs)
 {
 	int tasksCount;
 
-	if (ifs.read(reinterpret_cast<char*>(&tasksCount), sizeof(tasksCount))) {
-		Vector<SharedPtr<Task>> readTasks(tasksCount);
-		for (int i = 0; i < tasksCount; i++)
+	if (ifs.read(reinterpret_cast<char*>(&tasksCount), sizeof(tasksCount)))
+	{
+		if (tasksCount != 0)
 		{
-			readTasks[i]->deserialize(ifs);
+			Vector<SharedPtr<Task>> readTasks(tasksCount);
+			for (int i = 0; i < tasksCount; i++)
+			{
+				SharedPtr<Task> ptrTask = new Task();
+				ptrTask->deserialize(ifs);
+				readTasks.pushBack(ptrTask);
+			}
+			allTasks = readTasks;
 		}
-		allTasks = readTasks;
 
 		int usersCount;
 		ifs.read(reinterpret_cast<char*>(&usersCount), sizeof(usersCount));
 
-		Vector<SharedPtr<User>> readUsers(usersCount);
-		for (int i = 0; i < usersCount; i++)
+		if (usersCount != 0)
 		{
-			readUsers[i]->deserialize(ifs);
-
-			int tasksIndexesCount;
-			ifs.read(reinterpret_cast<char*>(&tasksIndexesCount), sizeof(tasksIndexesCount));
-			for (int j = 0; j < tasksIndexesCount; j++)
+			Vector<SharedPtr<User>> readUsers(usersCount);
+			for (int i = 0; i < usersCount; i++)
 			{
-				int currIndex;
-				ifs.read(reinterpret_cast<char*>(&currIndex), sizeof(currIndex));
-				readUsers[i]->addTask(*allTasks[currIndex]);
+				SharedPtr<User> ptrUser = new User();
+				ptrUser->deserialize(ifs);
+				readUsers.pushBack(ptrUser);
+
+				int tasksIndexesCount;
+				ifs.read(reinterpret_cast<char*>(&tasksIndexesCount), sizeof(tasksIndexesCount));
+				for (int j = 0; j < tasksIndexesCount; j++)
+				{
+					int currIndex;
+					ifs.read(reinterpret_cast<char*>(&currIndex), sizeof(currIndex));
+					if (allTasks[currIndex]->getId() != -1) {
+						readUsers[i]->addTask(*allTasks[currIndex]);
+					}
+				}
+
+				int dashboardIndexesCount;
+				ifs.read(reinterpret_cast<char*>(&dashboardIndexesCount), sizeof(dashboardIndexesCount));
+				for (int j = 0; j < dashboardIndexesCount; j++)
+				{
+					int currIndex;
+					ifs.read(reinterpret_cast<char*>(&currIndex), sizeof(currIndex));
+					if (allTasks[currIndex]->getId() != -1) {
+						readUsers[i]->addDeserializedTaskToDashboard(*allTasks[currIndex]);
+					}
+				}
 			}
+			allUsers = readUsers;
 		}
-		allUsers = readUsers;
 
 		int collabsCount;
 		ifs.read(reinterpret_cast<char*>(&collabsCount), sizeof(collabsCount));
-
-		Vector<SharedPtr<Collaboration>> readCollaborations(collabsCount);
-		for (int i = 0; i < collabsCount; i++)
+		if (collabsCount != 0)
 		{
-			readCollaborations[i]->deserialize(ifs);
-
-			int creatorIndex;
-			ifs.read(reinterpret_cast<char*>(&creatorIndex), sizeof(creatorIndex));
-
-			readCollaborations[i]->setCreator(allUsers[creatorIndex].operator->());
-
-			int tasksCount;
-			ifs.read(reinterpret_cast<char*>(&tasksCount), sizeof(tasksCount));
-
-			for (int j = 0; j < tasksCount; j++)
+			Vector<SharedPtr<Collaboration>> readCollaborations(collabsCount);
+			for (int i = 0; i < collabsCount; i++)
 			{
-				int currIndexTask;
-				int currIndexAssignee;
-				ifs.read(reinterpret_cast<char*>(&currIndexTask), sizeof(currIndexTask));
-				ifs.read(reinterpret_cast<char*>(&currIndexAssignee), sizeof(currIndexAssignee));
+				SharedPtr<Collaboration> ptrCollab = new Collaboration();
+				ptrCollab->deserialize(ifs);
+				readCollaborations.pushBack(ptrCollab);
 
-				readCollaborations[i]->addDeserializedTask(*allUsers[currIndexAssignee], *allTasks[currIndexTask]);
+				if (ptrCollab->getId() != -1)
+				{
+					int creatorIndex;
+					ifs.read(reinterpret_cast<char*>(&creatorIndex), sizeof(creatorIndex));
+
+					readCollaborations[i]->setCreator(allUsers[creatorIndex].operator->());
+
+					int tasksCount;
+					ifs.read(reinterpret_cast<char*>(&tasksCount), sizeof(tasksCount));
+
+					for (int j = 0; j < tasksCount; j++)
+					{
+						int currIndexTask;
+						int currIndexAssignee;
+						ifs.read(reinterpret_cast<char*>(&currIndexTask), sizeof(currIndexTask));
+						ifs.read(reinterpret_cast<char*>(&currIndexAssignee), sizeof(currIndexAssignee));
+
+						readCollaborations[i]->addDeserializedTask(*allUsers[currIndexAssignee], *allTasks[currIndexTask]);
+					}
+
+					int usersCount;
+					ifs.read(reinterpret_cast<char*>(&usersCount), sizeof(usersCount));
+
+					for (int j = 0; j < usersCount; j++)
+					{
+						int currIndex;
+						ifs.read(reinterpret_cast<char*>(&currIndex), sizeof(currIndex));
+						readCollaborations[i]->addDeserializedUser(*allUsers[currIndex]);
+					}
+				}
+
 			}
-
-			int usersCount;
-			ifs.read(reinterpret_cast<char*>(&usersCount), sizeof(usersCount));
-
-			for (int j = 0; j < usersCount; j++)
-			{
-				int currIndex;
-				ifs.read(reinterpret_cast<char*>(&currIndex), sizeof(currIndex));
-				readCollaborations[i]->addDeserializedUser(*allUsers[currIndex]);
-			}
+			allCollaborations = readCollaborations;
 		}
-		allCollaborations = readCollaborations;
 	}
+
 }
+
+
 
 void System::loadDataFromFile()
 {
@@ -200,7 +235,7 @@ void System::registerUser(const MyString& username, const MyString& password)
 	if (findUserIdx(username) == -1)
 	{
 		int userIndex = allUsers.getSize();
-		allUsers.pushBack(SharedPtr<User>( new User(userIndex, username, password)));
+		allUsers.pushBack(SharedPtr<User>(new User(userIndex, username, password)));
 
 		std::cout << "Successfully created account!" << std::endl;
 	}
@@ -253,6 +288,7 @@ void System::addTask(const MyString& name, const std::tm& due_date, const MyStri
 		int indexNewTask = allTasks.getSize();
 		allTasks.pushBack(SharedPtr<Task>(new Task(name, due_date, description, indexNewTask)));
 		loggedInUser->addTask(*allTasks[indexNewTask]);
+		loggedInUser->updateDashboard(loggedInTime);
 		std::cout << "Task added successfully!" << std::endl;
 	}
 }
