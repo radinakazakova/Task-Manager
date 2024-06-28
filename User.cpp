@@ -1,6 +1,8 @@
 #include "User.h"
 using namespace TimeManagement;
 
+static constexpr int MAX_LEN = 100;
+
 int User::findTask(int id) const
 {
 	size_t tasksCount = tasks.getSize();
@@ -38,7 +40,7 @@ int User::getSmallestIdFromName(const MyString& name)
 
 	for (int i = 0; i < tasksCount; i++)
 	{
-		if (tasks[i].getName() == name)
+		if (tasks[i].getName() == name && tasks[i].getId() != -1)
 		{
 			int currentId = tasks[i].getId();
 
@@ -90,7 +92,7 @@ bool User::taskExists(const MyString& name, const std::tm& due_date) const
 
 	for (int i = 0; i < tasksCount; i++)
 	{
-		if (tasks[i].getName() == name)
+		if (tasks[i].getId() != -1 && tasks[i].hasDate() && tasks[i].getName() == name)
 		{
 			if (tasks[i].getDueDate() == due_date)
 			{
@@ -117,6 +119,11 @@ bool User::taskExists(const MyString& name) const
 	return false;
 }
 
+void User::addDeserializedTaskToDashboard(Task& task)
+{
+	dashboard.addAtFirstFreeIndex(task);
+}
+
 void User::serialize(std::ofstream& ofs) const
 {
 	ofs.write(reinterpret_cast<const char*>(&index), sizeof(index));
@@ -133,16 +140,20 @@ void User::serialize(std::ofstream& ofs) const
 	ofs.write(reinterpret_cast<const char*>(&tasksCount), sizeof(tasksCount));
 	for (int i = 0; i < tasksCount; i++)
 	{
+
 		int currIndex = tasks[i].getIndex();
 		ofs.write(reinterpret_cast<const char*>(&currIndex), sizeof(currIndex));
+
 	}
 
 	int dashboardTasksCount = dashboard.getSize();
 	ofs.write(reinterpret_cast<const char*>(&dashboardTasksCount), sizeof(dashboardTasksCount));
 	for (int i = 0; i < dashboardTasksCount; i++)
 	{
+
 		int currIndex = dashboard[i].getIndex();
 		ofs.write(reinterpret_cast<const char*>(&currIndex), sizeof(currIndex));
+
 	}
 }
 
@@ -152,15 +163,17 @@ void User::deserialize(std::ifstream& ifs)
 
 	int nameSize;
 	ifs.read(reinterpret_cast<char*>(&nameSize), sizeof(nameSize));
-	MyString tempName(nameSize);
-	ifs.read(&tempName[0], nameSize);
+	char tempName[MAX_LEN] = {};
+	ifs.read(tempName, nameSize);
+	tempName[nameSize] = '\0';
 	username = tempName;
 
 	int passwordSize;
 	ifs.read(reinterpret_cast<char*>(&passwordSize), sizeof(passwordSize));
-	MyString tempPassword(passwordSize);
-	ifs.read(&tempPassword[0], passwordSize);
-	password = tempPassword;
+	char tempPass[MAX_LEN] = {};
+	ifs.read(tempPass, passwordSize);
+	tempPass[nameSize] = '\0';
+	password = tempPass;
 
 }
 
@@ -170,9 +183,12 @@ void User::updateTaskStatus(const std::tm& loggedInTime)
 
 	for (int i = 0; i < tasksCount; i++)
 	{
-		if (isBefore(tasks[i].getDueDate(), loggedInTime))
+		if (tasks[i].hasDate())
 		{
-			tasks[i].changeStatus(TaskStatus::OVERDUE);
+			if (isBefore(tasks[i].getDueDate(), loggedInTime))
+			{
+				tasks[i].changeStatus(TaskStatus::OVERDUE);
+			}
 		}
 	}
 }
@@ -193,16 +209,20 @@ void User::updateDashboard(const std::tm& loggedInTime)
 
 	for (int i = 0; i < tasksCount; i++)
 	{
-		if (isSameDay(tasks[i].getDueDate(), loggedInTime) && (tasks[i].getStatus() != TaskStatus::DONE) && !taskIsInDashboard(tasks[i]))
+		if (tasks[i].hasDate())
 		{
-			dashboard.addAtFirstFreeIndex(tasks[i]);
+			if (isSameDay(tasks[i].getDueDate(), loggedInTime) && (tasks[i].getStatus() != TaskStatus::DONE && tasks[i].getStatus() != TaskStatus::OVERDUE) && !taskIsInDashboard(tasks[i]))
+			{
+				dashboard.addAtFirstFreeIndex(tasks[i]);
+			}
 		}
 	}
 }
 
 void User::addTask(Task& task)
 {
-	tasks.addAtFirstFreeIndex(task);
+	if (task.getId() != -1)
+		tasks.addAtFirstFreeIndex(task);
 }
 
 void User::updateTaskName(int id, const MyString& name)
@@ -212,6 +232,7 @@ void User::updateTaskName(int id, const MyString& name)
 	if (index != -1)
 	{
 		tasks[index].changeName(name);
+		std::cout << "Task name updated!" << std::endl;
 	}
 	else
 	{
@@ -226,6 +247,7 @@ void User::startTask(int id)
 	if (index != -1)
 	{
 		tasks[index].changeStatus(TaskStatus::IN_PROCESS);
+		std::cout << "Task started!" << std::endl;
 	}
 	else
 	{
@@ -240,6 +262,7 @@ void User::updateTaskDescription(int id, const MyString& desc)
 	if (index != -1)
 	{
 		tasks[index].changeDescription(desc);
+		std::cout << "Task description updated!" << std::endl;
 	}
 	else
 	{
@@ -254,10 +277,11 @@ void User::removeTaskFromDashboard(int id)
 	if (index != -1)
 	{
 		dashboard.removeAt(index);
+		std::cout << "Task removed from dashboard!" << std::endl;
 	}
 	else
 	{
-		std::cout << "Task with that ID doesn't exist" << std::endl;
+		std::cout << "Task with that ID is not in dashboard." << std::endl;
 	}
 }
 
@@ -271,9 +295,10 @@ void User::addTaskToDashboard(int id)
 
 		if (indexDashboard == -1)
 		{
-			if (tasks[indexTasks].getStatus() != TaskStatus::OVERDUE || tasks[indexTasks].getStatus() != TaskStatus::DONE)
+			if (tasks[indexTasks].getStatus() != TaskStatus::OVERDUE && tasks[indexTasks].getStatus() != TaskStatus::DONE)
 			{
 				dashboard.addAtFirstFreeIndex(tasks[indexTasks]);
+				std::cout << "Task added to dashboard!" << std::endl;
 			}
 			else
 			{
@@ -293,29 +318,32 @@ void User::addTaskToDashboard(int id)
 
 bool User::deleteTask(int id)
 {
-	int indexTasks = findTask(id);
-
-	if (indexTasks != -1)
+	if (id != -1)
 	{
-		int indexDashboard = findTaskInDashboard(id);
+		int indexTasks = findTask(id);
 
-		if (indexDashboard != -1)
+		if (indexTasks != -1)
 		{
-			dashboard.removeAt(indexDashboard);
+			int indexDashboard = findTaskInDashboard(id);
 
-			tasks.removeAt(indexTasks);
-			return true;
+			if (indexDashboard != -1)
+			{
+				dashboard.removeAt(indexDashboard);
+
+				tasks.removeAt(indexTasks);
+				return true;
+			}
+			else
+			{
+				tasks.removeAt(indexTasks);
+				return true;
+			}
 		}
 		else
 		{
-			tasks.removeAt(indexTasks);
-			return true;
+			std::cout << "Task with that ID doesn't exist" << std::endl;
+			return false;
 		}
-	}
-	else
-	{
-		std::cout << "Task with that ID doesn't exist" << std::endl;
-		return false;
 	}
 }
 
@@ -353,10 +381,14 @@ void User::listTasks(const std::tm& date) const
 
 	for (int i = 0; i < tasksCount; i++)
 	{
-		if (isSameDay(tasks[i].getDueDate(), date))
+		if (tasks[i].hasDate() && tasks[i].getId() != -1)
 		{
-			tasks[i].printTask();
+			if (isSameDay(tasks[i].getDueDate(), date))
+			{
+				tasks[i].printTask();
+			}
 		}
+
 	}
 }
 
@@ -366,7 +398,10 @@ void User::listTasks() const
 
 	for (int i = 0; i < tasksCount; i++)
 	{
-		tasks[i].printTask();
+		if (tasks[i].getId() != -1)
+		{
+			tasks[i].printTask();
+		}
 	}
 }
 
@@ -376,7 +411,7 @@ void User::listCompletedTasks() const
 
 	for (int i = 0; i < tasksCount; i++)
 	{
-		if (tasks[i].getStatus() == TaskStatus::DONE)
+		if (tasks[i].getStatus() == TaskStatus::DONE && tasks[i].getId() != -1)
 		{
 			tasks[i].printTask();
 		}
@@ -389,7 +424,10 @@ void User::listDashboard() const
 
 	for (int i = 0; i < dashboardTasksCount; i++)
 	{
-		dashboard[i].printTask();
+		if (dashboard[i].getId() != -1)
+		{
+			dashboard[i].printTask();
+		}
 	}
 }
 
@@ -400,6 +438,7 @@ void User::finishTask(int id)
 	if (taskIndex != -1)
 	{
 		tasks[taskIndex].changeStatus(TaskStatus::DONE);
+		std::cout << "Task status is successfully changed to DONE!" << std::endl;
 	}
 	else
 	{
