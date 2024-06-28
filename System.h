@@ -3,6 +3,7 @@
 #include "Task.h"
 #include "User.h"
 #include "Collaboration.h"
+#include "SharedPtr.hpp"
 #include "Vector.hpp"
 #include <ctime>
 #include <fstream>
@@ -11,9 +12,9 @@ class System
 {
 	static const char filePath[];
 
-	Vector<Task> allTasks;
-	Vector<Collaboration> allCollaborations;
-	Vector<User> allUsers;
+	Vector<SharedPtr<Task>> allTasks;
+	Vector<SharedPtr<Collaboration>> allCollaborations;
+	Vector<SharedPtr<User>> allUsers;
 
 	User* loggedInUser = nullptr;
 	std::tm loggedInTime;
@@ -55,6 +56,7 @@ public:
 	void listCollaborations() const;
 	void addUser(const MyString& collaborationName, const MyString& username);
 	void assignTask(const MyString& collaborationName, const MyString& username, const MyString& taskName, const std::tm& due_date, const MyString& desc);
+	void assignTask(const MyString& collaborationName, const MyString& username, const MyString& taskName, const MyString& desc);
 	void listTasks(const MyString& collaborationName) const;
 
 	~System();
