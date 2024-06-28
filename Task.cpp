@@ -2,12 +2,13 @@
 #include <iomanip>
 
 int Task::uniqueNumber = -1;
+static constexpr int MAX_LENGHT = 100;
 
 void Task::printStatus(const TaskStatus& stat) const
 {
 	switch (stat)
 	{
-	case TaskStatus::ON_HOLD: 
+	case TaskStatus::ON_HOLD:
 		std::cout << "ON HOLD";
 		break;
 
@@ -15,11 +16,11 @@ void Task::printStatus(const TaskStatus& stat) const
 		std::cout << "DONE";
 		break;
 
-	case TaskStatus::IN_PROCESS: 
+	case TaskStatus::IN_PROCESS:
 		std::cout << "IN PROCESS";
 		break;
 
-	case TaskStatus::OVERDUE: 
+	case TaskStatus::OVERDUE:
 		std::cout << "OVERDUE";
 		break;
 	}
@@ -31,23 +32,18 @@ Task::Task()
 	id = uniqueNumber;
 }
 
-Task::Task(const MyString& name,const std::tm& due_date, const MyString& description, int index): index(index), name(name), description(description)
+Task::Task(const MyString& name, const std::tm& due_date, const MyString& description, int index) : index(index), name(name), description(description)
 {
 	uniqueNumber++;
 	id = uniqueNumber;
 	this->due_date.setValue(due_date);
 }
 
-Task::Task(const MyString& name, const MyString& description, int index): index(index), name(name) , description(description) //Optional default -> value = nullptr
+Task::Task(const MyString& name, const MyString& description, int index) : index(index), name(name), description(description) //Optional default -> value = nullptr
 {
 	uniqueNumber++;
 	id = uniqueNumber;
-} 
-
-//Task* Task::clone() const
-//{
-//	return new Task(*this);
-//}
+}
 
 void Task::changeName(const MyString& name)
 {
@@ -68,7 +64,10 @@ void Task::printTask() const
 {
 	std::cout << "Task name: " << name << std::endl;
 	std::cout << "Task ID: " << id << std::endl;
-	std::cout << "Due date: " << std::put_time(&due_date.getValue(), "%Y-%m-%d %H:%M:%S") << std::endl;
+	if (due_date.hasValue())
+	{
+		std::cout << "Due date: " << std::put_time(&due_date.getValue(), "%Y-%m-%d %H:%M:%S") << std::endl;
+	}
 	std::cout << "Status: ";
 	printStatus(status);
 	std::cout << "\n";
@@ -81,30 +80,34 @@ void Task::serialize(std::ofstream& ofs) const
 	ofs.write(reinterpret_cast<const char*>(&index), sizeof(index));
 	ofs.write(reinterpret_cast<const char*>(&id), sizeof(id));
 
-	int nameSize = name.getLength();
-	ofs.write(reinterpret_cast<const char*>(&nameSize), sizeof(nameSize));
-	ofs.write(name.c_str(), nameSize);
-
-	bool dateHasValue;
-	if(due_date.hasValue())
+	if (id != -1)
 	{
-		dateHasValue = true;
+		int nameSize = name.getLength();
+		ofs.write(reinterpret_cast<const char*>(&nameSize), sizeof(nameSize));
+		ofs.write(name.c_str(), nameSize);
 
-		ofs.write(reinterpret_cast<const char*>(&dateHasValue), sizeof(dateHasValue));
-		ofs.write(reinterpret_cast<const char*>(&due_date.getValue()), sizeof(std::tm));
+		bool dateHasValue;
+		if (due_date.hasValue())
+		{
+			dateHasValue = true;
+
+			ofs.write(reinterpret_cast<const char*>(&dateHasValue), sizeof(dateHasValue));
+			ofs.write(reinterpret_cast<const char*>(&due_date.getValue()), sizeof(std::tm));
+		}
+		else
+		{
+			dateHasValue = false;
+			ofs.write(reinterpret_cast<const char*>(&dateHasValue), sizeof(dateHasValue));
+		}
+
+		int castStatus = status;
+		ofs.write(reinterpret_cast<const char*>(&castStatus), sizeof(castStatus));
+
+		int descSize = description.getLength();
+		ofs.write(reinterpret_cast<const char*>(&descSize), sizeof(descSize));
+		ofs.write(description.c_str(), descSize);
 	}
-	else
-	{
-		dateHasValue = false;
-		ofs.write(reinterpret_cast<const char*>(&dateHasValue), sizeof(dateHasValue));
-	}
 
-	int castStatus = status;
-	ofs.write(reinterpret_cast<const char*>(&castStatus), sizeof(castStatus));
-
-	int descSize = description.getLength();
-	ofs.write(reinterpret_cast<const char*>(&descSize), sizeof(descSize));
-	ofs.write(description.c_str(), descSize);
 }
 
 void Task::deserialize(std::ifstream& ifs)
@@ -112,32 +115,38 @@ void Task::deserialize(std::ifstream& ifs)
 	ifs.read(reinterpret_cast<char*>(&index), sizeof(index));
 	ifs.read(reinterpret_cast<char*>(&id), sizeof(id));
 
-	int nameSize;
-	ifs.read(reinterpret_cast<char*>(&nameSize), sizeof(nameSize));
-	MyString tempName(nameSize);
-	ifs.read(&tempName[0], nameSize);
-	name = tempName;
-
-	bool dateHasValue;
-	ifs.read(reinterpret_cast<char*>(&dateHasValue), sizeof(dateHasValue));
-
-	if(dateHasValue)
+	if (id != -1)
 	{
-		std::tm date;
-		ifs.read(reinterpret_cast<char*>(&date), sizeof(std::tm));
-		due_date.setValue(date);
+		int nameSize;
+		ifs.read(reinterpret_cast<char*>(&nameSize), sizeof(nameSize));
+		char tempName[MAX_LENGHT] = {};
+		ifs.read(tempName, nameSize);
+		tempName[nameSize] = '\0';
+		name = tempName;
+
+		bool dateHasValue;
+		ifs.read(reinterpret_cast<char*>(&dateHasValue), sizeof(dateHasValue));
+
+		if (dateHasValue)
+		{
+			std::tm date;
+			ifs.read(reinterpret_cast<char*>(&date), sizeof(std::tm));
+			due_date.setValue(date);
+		}
+		//else default Optional will be nullptr
+
+		int castStatus;
+		ifs.read(reinterpret_cast<char*>(&castStatus), sizeof(castStatus));
+		status = static_cast<TaskStatus>(castStatus);
+
+		int descSize;
+		ifs.read(reinterpret_cast<char*>(&descSize), sizeof(descSize));
+		char tempDesc[MAX_LENGHT] = {};
+		ifs.read(tempDesc, descSize);
+		tempDesc[descSize] = '\0';
+		description = tempDesc;
 	}
-	//else default Optional will be nullptr
 
-	int castStatus;
-	ifs.read(reinterpret_cast<char*>(&castStatus), sizeof(castStatus));
-	status = static_cast<TaskStatus>(castStatus);
-
-	int descSize;
-	ifs.read(reinterpret_cast<char*>(&descSize), sizeof(descSize));
-	MyString tempDesc(descSize);
-	ifs.read(&tempDesc[0], descSize);
-	description = tempDesc;
 }
 
 int Task::getId() const
@@ -163,4 +172,14 @@ const std::tm& Task::getDueDate() const
 const MyString& Task::getName() const
 {
 	return name;
+}
+
+void Task::setInvalidId()
+{
+	id = -1;
+}
+
+bool Task::hasDate() const
+{
+	return due_date.hasValue();
 }
