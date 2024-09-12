@@ -11,7 +11,7 @@
 template<typename T>
 class Vector {
 private:
-	static const short INITIAL_CAPACITY = 4;
+	static const short INITIAL_CAPACITY = 16;
 	static const short RESIZE_COEF = 2; // the most optimal is between 1.4 and 1.5
 
 	T* data = nullptr;
