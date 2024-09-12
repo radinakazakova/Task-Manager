@@ -9,22 +9,44 @@
 
 namespace
 {
+	constexpr int MAX_SIZE = 100;
+	constexpr char commandRegister[] = "register";
+	constexpr char commandLogin[] = "login";
+	constexpr char commandAddTask[] = "add-task";
+	constexpr char commandUpdateTaskName[] = "update-task-name";
+	constexpr char commandStartTask[] = "start-task";
+	constexpr char commandUpdateTaskDescription[] = "update-task-description";
+	constexpr char commandRemoveTaskFromDashboard[] = "remove-task-from-dashboard";
+	constexpr char commandAddTaskToDashboard[] = "add-task-to-dashboard";
+	constexpr char commandDeleteTask[] = "delete-task";
+	constexpr char commandGetTask[] = "get-task";
+	constexpr char commandListTasks[] = "list-tasks";
+	constexpr char commandListCompletedTasks[] = "list-completed-tasks";
+	constexpr char commandListDashboard[] = "list-dashboard";
+	constexpr char commandFinishTask[] = "finish-task";
+	constexpr char commandLogout[] = "logout";
+	constexpr char commandAddCollaboration[] = "add-collaboration";
+	constexpr char commandDeleteCollaboration[] = "delete-collaboration";
+	constexpr char commandListCollaborations[] = "list-collaborations";
+	constexpr char commandAddUser[] = "add-user";
+	constexpr char commandAssignTask[] = "assign-task";
+	constexpr char commandExit[] = "exit";
+	constexpr char dateFormat[] = "%Y-%m-%d %H:%M:%S";
 
-	 constexpr int MAX_SIZE = 100;
 
-	 bool isNumber(char ch)
+	bool isNumber(char ch)
 	{
 		return ch >= '0' && ch <= '9';
 	}
 
-	 bool strToTm(const MyString& str, const MyString& format, std::tm& tm)
+	bool strToTm(const MyString& str, const MyString& format, std::tm& tm)
 	{
 		std::istringstream ss(str.c_str());
 		ss >> std::get_time(&tm, format.c_str());
 		return !(ss.fail());
 	}
 
-	 int charToInt(const char* str)
+	int charToInt(const char* str)
 	{
 		if (str == nullptr || *str == '\0')
 		{
@@ -51,9 +73,9 @@ namespace
 	}
 }
 
-void executeCommand( System& system, const MyString& command, std::stringstream& ss)
+void executeCommand(System& system, const MyString& command, std::stringstream& ss)
 {
-	if (command == "register")
+	if (command == commandRegister)
 	{
 		MyString username;
 		MyString password;
@@ -64,7 +86,7 @@ void executeCommand( System& system, const MyString& command, std::stringstream&
 		RegisterCommand commandToExecute(system, username, password);
 		commandToExecute.execute();
 	}
-	else if (command == "login")
+	else if (command == commandLogin)
 	{
 		MyString username;
 		MyString password;
@@ -75,7 +97,7 @@ void executeCommand( System& system, const MyString& command, std::stringstream&
 		LoginCommand commandToExecute(system, username, password);
 		commandToExecute.execute();
 	}
-	else if (command == "add-task")
+	else if (command == commandAddTask)
 	{
 		MyString name;
 		char nextArg[MAX_SIZE];
@@ -86,7 +108,7 @@ void executeCommand( System& system, const MyString& command, std::stringstream&
 
 		if (isNumber(nextArg[0]))
 		{
-			MyString format = "%Y-%m-%d %H:%M:%S";
+			MyString format = dateFormat;
 			std::tm tm = {};
 
 			std::stringstream sstream(nextArg);
@@ -112,7 +134,7 @@ void executeCommand( System& system, const MyString& command, std::stringstream&
 			commandToExecute.execute();
 		}
 	}
-	else if (command == "update-task-name")
+	else if (command == commandUpdateTaskName)
 	{
 		int id;
 		MyString name;
@@ -121,14 +143,14 @@ void executeCommand( System& system, const MyString& command, std::stringstream&
 		UpdateTaskNameCommand commandToExecute(system, id, name);
 		commandToExecute.execute();
 	}
-	else if (command == "start-task")
+	else if (command == commandStartTask)
 	{
 		int id;
 		ss >> id;
 		StartTaskCommand commandToExecute(system, id);
 		commandToExecute.execute();
 	}
-	else if (command == "update-task-description")
+	else if (command == commandUpdateTaskDescription)
 	{
 		int id;
 		char desc[MAX_SIZE];
@@ -139,7 +161,7 @@ void executeCommand( System& system, const MyString& command, std::stringstream&
 		UpdateTaskDescriptionCommand commandToExecute(system, id, desc);
 		commandToExecute.execute();
 	}
-	else if (command == "remove-task-from-dashboard")
+	else if (command == commandRemoveTaskFromDashboard)
 	{
 		int id;
 		ss >> id;
@@ -147,7 +169,7 @@ void executeCommand( System& system, const MyString& command, std::stringstream&
 		RemoveTaskFromDashboardCommand commandToExecute(system, id);
 		commandToExecute.execute();
 	}
-	else if (command == "add-task-to-dashboard")
+	else if (command == commandAddTaskToDashboard)
 	{
 		int id;
 		ss >> id;
@@ -155,7 +177,7 @@ void executeCommand( System& system, const MyString& command, std::stringstream&
 		AddTaskToDashboardCommand commandToExecute(system, id);
 		commandToExecute.execute();
 	}
-	else if (command == "delete-task")
+	else if (command == commandDeleteTask)
 	{
 		int id;
 		ss >> id;
@@ -163,12 +185,12 @@ void executeCommand( System& system, const MyString& command, std::stringstream&
 		DeleteTaskCommand commandToExecute(system, id);
 		commandToExecute.execute();
 	}
-	else if (command == "get-task")
+	else if (command == commandGetTask)
 	{
 		MyString arg;
 		ss >> arg;
 
-		if(isNumber(arg[0]))
+		if (isNumber(arg[0]))
 		{
 			try
 			{
@@ -176,7 +198,7 @@ void executeCommand( System& system, const MyString& command, std::stringstream&
 				GetTaskCommand commandToExecute(system, id);
 				commandToExecute.execute();
 			}
-			catch(std::exception& e)
+			catch (std::exception& e)
 			{
 				std::cout << "Invalid id input." << std::endl;
 			}
@@ -187,18 +209,19 @@ void executeCommand( System& system, const MyString& command, std::stringstream&
 			commandToExecute.execute();
 		}
 	}
-	else if (command == "list-tasks")
+	else if (command == commandListTasks)
 	{
 		MyString arg;
+		ss >> arg;
 
-		if(arg.getLength() == 0)
+		if (arg.getLength() == 0)
 		{
 			ListTasksCommand command(system);
 			command.execute();
 		}
-		else if(isNumber(arg[0]))
+		else if (isNumber(arg[0]))
 		{
-			MyString format = "%Y-%m-%d %H:%M:%S";
+			MyString format = dateFormat;
 			std::tm tm = {};
 			if (strToTm(arg, format, tm))
 			{
@@ -216,17 +239,17 @@ void executeCommand( System& system, const MyString& command, std::stringstream&
 			command.execute();
 		}
 	}
-	else if (command == "list-completed-tasks")
+	else if (command == commandListCompletedTasks)
 	{
 		ListCompletedTasksCommand command(system);
 		command.execute();
 	}
-	else if (command == "list-dashboard")
+	else if (command == commandListDashboard)
 	{
 		ListDashboardCommand command(system);
 		command.execute();
 	}
-	else if (command == "finish-task")
+	else if (command == commandFinishTask)
 	{
 		int id;
 		ss >> id;
@@ -234,19 +257,19 @@ void executeCommand( System& system, const MyString& command, std::stringstream&
 		FinishTaskCommand command(system, id);
 		command.execute();
 	}
-	else if (command == "logout")
+	else if (command == commandLogout)
 	{
 		LogoutCommand command(system);
 		command.execute();
 	}
-	else if(command == "add-collaboration")
+	else if (command == commandAddCollaboration)
 	{
 		MyString name;
 		ss >> name;
 		AddCollaborationCommand command(system, name);
 		command.execute();
 	}
-	else if(command == "delete-collaboration")
+	else if (command == commandDeleteCollaboration)
 	{
 		MyString name;
 		ss >> name;
@@ -254,12 +277,12 @@ void executeCommand( System& system, const MyString& command, std::stringstream&
 		DeleteCollaborationCommand command(system, name);
 		command.execute();
 	}
-	else if(command == "list-collaborations")
+	else if (command == commandListCollaborations)
 	{
 		listCollaborationsCommand command(system);
 		command.execute();
 	}
-	else if(command == "add-user")
+	else if (command == commandAddUser)
 	{
 		MyString collabName;
 		MyString userName;
@@ -268,30 +291,44 @@ void executeCommand( System& system, const MyString& command, std::stringstream&
 		AddUserCommand command(system, collabName, userName);
 		command.execute();
 	}
-	else if(command == "assign-task")
+	else if (command == commandAssignTask)
 	{
 		MyString collabName;
 		MyString username;
 		MyString name;
-		MyString due_date;
-		char description[MAX_SIZE];
+		char nextArg[MAX_SIZE];
 
-		ss >> collabName >> username >> name >> due_date;
+		ss >> collabName >> username >> name;
 		ss.ignore();
-		ss.getline(description, MAX_SIZE);
+		ss.getline(nextArg, MAX_SIZE);
 
-		MyString format = "%Y-%m-%d %H:%M:%S";
-		std::tm tm = {};
-
-		if (strToTm(due_date, format, tm))
+		if (isNumber(nextArg[0]))
 		{
-			AssignTaskCommand command(system, collabName, username, name, tm, description);
-			command.execute();
+			std::stringstream sstream(nextArg);
+			MyString due_date;
+			char description[MAX_SIZE];
+			MyString format = dateFormat;
+			std::tm tm = {};
+
+			sstream >> due_date;
+			sstream.getline(description, MAX_SIZE);
+
+			if (strToTm(due_date, format, tm))
+			{
+				AssignTaskCommand command(system, collabName, username, name, tm, description);
+				command.execute();
+			}
+			else
+			{
+				std::cout << "Invalid arguments. Try again. Input a valid due date.";
+			}
 		}
 		else
 		{
-			std::cout << "Invalid arguments. Try again. Input a valid due date.";
+			AssignTaskCommand command(system, collabName, username, name, nextArg);
+			command.execute();
 		}
+
 	}
 	else
 	{
@@ -304,7 +341,7 @@ int main()
 	try
 	{
 		System system;
-		//system.loadDataFromFile();
+		system.loadDataFromFile();
 
 		while (true)
 		{
@@ -318,7 +355,7 @@ int main()
 
 			ss.getline(command, MAX_SIZE, ' ');
 
-			if (strcmp(command, "exit") == 0)
+			if (strcmp(command, commandExit) == 0)
 			{
 				break;
 			}
@@ -326,10 +363,10 @@ int main()
 			executeCommand(system, command, ss);
 		}
 	}
-	catch(std::exception& e)
+	catch (std::exception& e)
 	{
 		std::cout << e.what() << std::endl;
 	}
 	return 0;
-	
+
 }
