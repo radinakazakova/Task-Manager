@@ -26,8 +26,10 @@ public:
 	int getIndex() const;
 	Task* getTaskFromIndex(int index) const;
 	size_t getTasksCount() const;
+	int getId() const;
 
 	void setCreator(User* creator);
+	void setInvalidId();
 
 	void serialize(std::ofstream& ofs) const;
 	void deserialize(std::ifstream& ifs);
