@@ -31,6 +31,7 @@ public:
 	bool checkPassword(const MyString& pass) const;
 	bool taskExists(const MyString& name, const std::tm& due_date) const;
 	bool taskExists(const MyString& name) const;
+	void addDeserializedTaskToDashboard(Task& task);
 
 	void serialize(std::ofstream& ofs) const;
 	void deserialize(std::ifstream& ifs);
