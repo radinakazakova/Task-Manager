@@ -5,17 +5,17 @@
 class Command
 {
 public:
-	Command(const System& system);
+	Command(System& system);
 	virtual void execute() = 0;
 	virtual ~Command() = default;
 protected:
-	System system;
+	System& system;
 };
 
 class RegisterCommand : public Command
 {
 public:
-	RegisterCommand(const System& system, const MyString& username, const MyString& password);
+	RegisterCommand(System& system, const MyString& username, const MyString& password);
 	void execute() override;
 
 private:
@@ -26,7 +26,7 @@ private:
 class LoginCommand : public Command
 {
 public:
-	LoginCommand(const System& system, const MyString& username, const MyString& password);
+	LoginCommand( System& system, const MyString& username, const MyString& password);
 	void execute() override;
 private:
 	MyString username;
@@ -36,8 +36,8 @@ private:
 class AddTaskCommand : public Command
 {
 public:
-	AddTaskCommand(const System& system, const MyString& name, const std::tm& due_date, const MyString& description);
-	AddTaskCommand(const System& system, const MyString& name, const MyString& description);
+	AddTaskCommand( System& system, const MyString& name, const std::tm& due_date, const MyString& description);
+	AddTaskCommand( System& system, const MyString& name, const MyString& description);
 
 	void execute() override;
 private:
@@ -50,7 +50,7 @@ private:
 class UpdateTaskNameCommand : public Command
 {
 public:
-	UpdateTaskNameCommand(const System& system, int id, const MyString& name);
+	UpdateTaskNameCommand( System& system, int id, const MyString& name);
 	void execute() override;
 private:
 	int id;
@@ -60,7 +60,7 @@ private:
 class StartTaskCommand : public Command
 {
 public:
-	StartTaskCommand(const System& system, int id);
+	StartTaskCommand( System& system, int id);
 	void execute() override;
 private:
 	int id;
@@ -70,7 +70,7 @@ private:
 class UpdateTaskDescriptionCommand : public Command
 {
 public:
-	UpdateTaskDescriptionCommand(const System& system, int id, const MyString& desc);
+	UpdateTaskDescriptionCommand( System& system, int id, const MyString& desc);
 	void execute() override;
 private:
 	int id;
@@ -80,7 +80,7 @@ private:
 class RemoveTaskFromDashboardCommand : public Command
 {
 public:
-	RemoveTaskFromDashboardCommand(const System& system, int id);
+	RemoveTaskFromDashboardCommand( System& system, int id);
 	void execute() override;
 private:
 	int id;
@@ -89,7 +89,7 @@ private:
 class AddTaskToDashboardCommand : public Command
 {
 public:
-	AddTaskToDashboardCommand(const System& system, int id);
+	AddTaskToDashboardCommand( System& system, int id);
 	void execute() override;
 private:
 	int id;
@@ -99,7 +99,7 @@ private:
 class DeleteTaskCommand : public Command
 {
 public:
-	DeleteTaskCommand(const System& system, int id);
+	DeleteTaskCommand( System& system, int id);
 	void execute() override;
 private:
 	int id;
@@ -108,8 +108,8 @@ private:
 class GetTaskCommand : public Command
 {
 public:
-	GetTaskCommand(const System& system, int id);
-	GetTaskCommand(const System& system, const MyString& name);
+	GetTaskCommand( System& system, int id);
+	GetTaskCommand( System& system, const MyString& name);
 	void execute() override;
 private:
 	int id = -1;
@@ -119,9 +119,9 @@ private:
 class ListTasksCommand : public Command
 {
 public:
-	ListTasksCommand(const System& system, const std::tm& date);
-	ListTasksCommand(const System& system );
-	ListTasksCommand(const System& system, const MyString& collabName);
+	ListTasksCommand( System& system, const std::tm& date);
+	ListTasksCommand( System& system );
+	ListTasksCommand( System& system, const MyString& collabName);
 	void execute() override;
 
 private:
@@ -134,7 +134,7 @@ private:
 class ListCompletedTasksCommand : public Command
 {
 public:
-	ListCompletedTasksCommand(const System& system);
+	ListCompletedTasksCommand( System& system);
 	void execute() override;
 
 };
@@ -142,7 +142,7 @@ public:
 class ListDashboardCommand : public Command
 {
 public:
-	ListDashboardCommand(const System& system);
+	ListDashboardCommand( System& system);
 	void execute() override;
 
 };
@@ -150,7 +150,7 @@ public:
 class FinishTaskCommand : public Command
 {
 public:
-	FinishTaskCommand(const System& system, int id);
+	FinishTaskCommand( System& system, int id);
 	void execute() override;
 private:
 	int id;
@@ -159,7 +159,7 @@ private:
 class LogoutCommand : public Command
 {
 public:
-	LogoutCommand(const System& system);
+	LogoutCommand( System& system);
 	void execute() override;
 
 };
@@ -167,7 +167,7 @@ public:
 class AddCollaborationCommand : public Command
 {
 public:
-	AddCollaborationCommand(const System& system, const MyString& name);
+	AddCollaborationCommand( System& system, const MyString& name);
 	void execute() override;
 private:
 	MyString name;
@@ -176,7 +176,7 @@ private:
 class DeleteCollaborationCommand : public Command
 {
 public:
-	DeleteCollaborationCommand(const System& system, const MyString& name);
+	DeleteCollaborationCommand( System& system, const MyString& name);
 	void execute() override;
 private:
 	MyString name;
@@ -185,7 +185,7 @@ private:
 class listCollaborationsCommand : public Command
 {
 public:
-	listCollaborationsCommand(const System& system);
+	listCollaborationsCommand( System& system);
 	void execute() override;
 
 };
@@ -193,7 +193,7 @@ public:
 class AddUserCommand : public Command
 {
 public:
-	AddUserCommand(const System& system, const MyString& collaborationName, const MyString& username);
+	AddUserCommand( System& system, const MyString& collaborationName, const MyString& username);
 	void execute() override;
 private:
 	MyString collaborationName;
@@ -203,7 +203,11 @@ private:
 class AssignTaskCommand : public Command
 {
 public:
-	AssignTaskCommand(const System& system, const MyString& collaborationName, const MyString& username, const MyString& taskName, const std::tm& due_date, const MyString& desc);
+
+	AssignTaskCommand(System& system, const MyString& collaborationName, const MyString& username,
+	                  const MyString& taskName, const std::tm& due_date, const MyString& desc);
+	AssignTaskCommand(System& system, const MyString& collaborationName, const MyString& username, const MyString& taskName, const MyString& desc);
+
 	void execute() override;
 private:
 	MyString collaborationName;
@@ -212,4 +216,5 @@ private:
 	std::tm due_date;
 	MyString desc;
 
+	bool hasDate = false;
 };
