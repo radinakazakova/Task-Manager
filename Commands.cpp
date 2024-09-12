@@ -2,11 +2,11 @@
 #include <iostream>
 #include <exception>
 
-Command::Command(const System& system) : system(system)
+Command::Command( System& system) : system(system)
 {
 }
 
-RegisterCommand::RegisterCommand(const System& system, const MyString& username, const MyString& password) : Command(system), username(username), password(password)
+RegisterCommand::RegisterCommand( System& system, const MyString& username, const MyString& password) : Command(system), username(username), password(password)
 {
 }
 
@@ -22,7 +22,7 @@ void RegisterCommand::execute()
 	}
 }
 
-LoginCommand::LoginCommand(const System& system, const MyString& username, const MyString& password) : Command(system), username(username), password(password)
+LoginCommand::LoginCommand( System& system, const MyString& username, const MyString& password) : Command(system), username(username), password(password)
 {
 }
 
@@ -38,12 +38,12 @@ void LoginCommand::execute()
 	}
 }
 
-AddTaskCommand::AddTaskCommand(const System& system, const MyString& name, const std::tm& due_date,
+AddTaskCommand::AddTaskCommand( System& system, const MyString& name, const std::tm& due_date,
 	const MyString& description) : Command(system), name(name), due_date(due_date), description(description), hasDueDate(true)
 {
 }
 
-AddTaskCommand::AddTaskCommand(const System& system, const MyString& name, const MyString& description) : Command(system), name(name), due_date(due_date), description(description)
+AddTaskCommand::AddTaskCommand( System& system, const MyString& name, const MyString& description) : Command(system), name(name), due_date(due_date), description(description)
 {
 }
 
@@ -67,7 +67,7 @@ void AddTaskCommand::execute()
 
 }
 
-UpdateTaskNameCommand::UpdateTaskNameCommand(const System& system, int id, const MyString& name): Command(system), id(id), name(name)
+UpdateTaskNameCommand::UpdateTaskNameCommand( System& system, int id, const MyString& name): Command(system), id(id), name(name)
 {
 }
 
@@ -83,7 +83,7 @@ void UpdateTaskNameCommand::execute()
 	}
 }
 
-StartTaskCommand::StartTaskCommand(const System& system, int id): Command(system), id(id)
+StartTaskCommand::StartTaskCommand( System& system, int id): Command(system), id(id)
 {
 }
 
@@ -99,7 +99,7 @@ void StartTaskCommand::execute()
 	}
 }
 
-UpdateTaskDescriptionCommand::UpdateTaskDescriptionCommand(const System& system, int id, const MyString& desc) : Command(system), id(id), desc(desc)
+UpdateTaskDescriptionCommand::UpdateTaskDescriptionCommand( System& system, int id, const MyString& desc) : Command(system), id(id), desc(desc)
 {
 }
 
@@ -115,7 +115,7 @@ void UpdateTaskDescriptionCommand::execute()
 	}
 }
 
-RemoveTaskFromDashboardCommand::RemoveTaskFromDashboardCommand(const System& system, int id) : Command(system), id(id)
+RemoveTaskFromDashboardCommand::RemoveTaskFromDashboardCommand( System& system, int id) : Command(system), id(id)
 {
 }
 
@@ -131,7 +131,7 @@ void RemoveTaskFromDashboardCommand::execute()
 	}
 }
 
-AddTaskToDashboardCommand::AddTaskToDashboardCommand(const System& system, int id) : Command(system), id(id)
+AddTaskToDashboardCommand::AddTaskToDashboardCommand( System& system, int id) : Command(system), id(id)
 {
 }
 
@@ -147,7 +147,7 @@ void AddTaskToDashboardCommand::execute()
 	}
 }
 
-DeleteTaskCommand::DeleteTaskCommand(const System& system, int id) : Command(system), id(id)
+DeleteTaskCommand::DeleteTaskCommand( System& system, int id) : Command(system), id(id)
 {
 }
 
@@ -163,11 +163,11 @@ void DeleteTaskCommand::execute()
 	}
 }
 
-GetTaskCommand::GetTaskCommand(const System& system, int id): Command(system), id(id)
+GetTaskCommand::GetTaskCommand( System& system, int id): Command(system), id(id)
 {
 }
 
-GetTaskCommand::GetTaskCommand(const System& system, const MyString& name):Command(system), name(name)
+GetTaskCommand::GetTaskCommand( System& system, const MyString& name):Command(system), name(name)
 {
 }
 
@@ -190,15 +190,15 @@ void GetTaskCommand::execute()
 	}
 }
 
-ListTasksCommand::ListTasksCommand(const System& system, const std::tm& date): Command(system), date(date), hasDate(true)
+ListTasksCommand::ListTasksCommand( System& system, const std::tm& date): Command(system), date(date), hasDate(true)
 {
 }
 
-ListTasksCommand::ListTasksCommand(const System& system):Command(system)
+ListTasksCommand::ListTasksCommand( System& system):Command(system)
 {
 }
 
-ListTasksCommand::ListTasksCommand(const System& system, const MyString& collabName): Command(system), collabName(collabName), hasCollabName(true)
+ListTasksCommand::ListTasksCommand( System& system, const MyString& collabName): Command(system), collabName(collabName), hasCollabName(true)
 {
 }
 
@@ -225,7 +225,7 @@ void ListTasksCommand::execute()
 	}
 }
 
-ListCompletedTasksCommand::ListCompletedTasksCommand(const System& system): Command(system)
+ListCompletedTasksCommand::ListCompletedTasksCommand( System& system): Command(system)
 {
 }
 
@@ -241,7 +241,7 @@ void ListCompletedTasksCommand::execute()
 	}
 }
 
-ListDashboardCommand::ListDashboardCommand(const System& system): Command(system)
+ListDashboardCommand::ListDashboardCommand( System& system): Command(system)
 {
 }
 
@@ -257,7 +257,7 @@ void ListDashboardCommand::execute()
 	}
 }
 
-FinishTaskCommand::FinishTaskCommand(const System& system, int id):Command(system), id(id)
+FinishTaskCommand::FinishTaskCommand( System& system, int id):Command(system), id(id)
 {
 }
 
@@ -273,7 +273,7 @@ void FinishTaskCommand::execute()
 	}
 }
 
-LogoutCommand::LogoutCommand(const System& system) :Command(system)
+LogoutCommand::LogoutCommand( System& system) :Command(system)
 {
 }
 
@@ -289,7 +289,7 @@ void LogoutCommand::execute()
 	}
 }
 
-AddCollaborationCommand::AddCollaborationCommand(const System& system, const MyString& name): Command(system), name(name)
+AddCollaborationCommand::AddCollaborationCommand( System& system, const MyString& name): Command(system), name(name)
 {
 }
 
@@ -305,7 +305,7 @@ void AddCollaborationCommand::execute()
 	}
 }
 
-DeleteCollaborationCommand::DeleteCollaborationCommand(const System& system, const MyString& name) : Command(system), name(name)
+DeleteCollaborationCommand::DeleteCollaborationCommand( System& system, const MyString& name) : Command(system), name(name)
 {
 }
 
@@ -321,7 +321,7 @@ void DeleteCollaborationCommand::execute()
 	}
 }
 
-listCollaborationsCommand::listCollaborationsCommand(const System& system):Command(system)
+listCollaborationsCommand::listCollaborationsCommand( System& system):Command(system)
 {
 }
 
@@ -337,7 +337,7 @@ void listCollaborationsCommand::execute()
 	}
 }
 
-AddUserCommand::AddUserCommand(const System& system, const MyString& collaborationName, const MyString& username): Command(system), collaborationName(collaborationName), username(username)
+AddUserCommand::AddUserCommand( System& system, const MyString& collaborationName, const MyString& username): Command(system), collaborationName(collaborationName), username(username)
 {
 }
 
@@ -353,8 +353,13 @@ void AddUserCommand::execute()
 	}
 }
 
-AssignTaskCommand::AssignTaskCommand(const System& system, const MyString& collaborationName, const MyString& username,
-	const MyString& taskName, const std::tm& due_date, const MyString& desc): Command(system), collaborationName(collaborationName), username(username), taskName(taskName), due_date(due_date), desc(desc)
+AssignTaskCommand::AssignTaskCommand( System& system, const MyString& collaborationName, const MyString& username,
+	const MyString& taskName, const std::tm& due_date, const MyString& desc): Command(system), collaborationName(collaborationName), username(username), taskName(taskName), due_date(due_date), desc(desc), hasDate(true)
+{
+}
+
+AssignTaskCommand::AssignTaskCommand(System& system, const MyString& collaborationName, const MyString& username,
+	const MyString& taskName, const MyString& desc): Command(system), collaborationName(collaborationName), username(username), taskName(taskName), desc(desc)
 {
 }
 
@@ -362,7 +367,14 @@ void AssignTaskCommand::execute()
 {
 	try
 	{
-		system.assignTask(collaborationName, username, taskName, due_date, desc);
+		if(hasDate)
+		{
+			system.assignTask(collaborationName, username, taskName, due_date, desc);
+		}
+		else
+		{
+			system.assignTask(collaborationName, username, taskName, desc);
+		}
 	}
 	catch (std::exception& e)
 	{
