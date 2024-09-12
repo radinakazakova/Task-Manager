@@ -28,7 +28,6 @@ class Task
 public:
 
 	Task();
-	Task(const MyString& name, const std::tm& due_date, const MyString& description, int index, int id);
 	Task(const MyString& name, const std::tm& due_date, const MyString& description, int index);
 	Task(const MyString& name, const MyString& description, int index);
 
@@ -45,5 +44,6 @@ public:
 	const TaskStatus& getStatus() const;
 	const std::tm& getDueDate() const;
 	const MyString& getName() const;
-
+	void setInvalidId();
+	bool hasDate() const;
 };
