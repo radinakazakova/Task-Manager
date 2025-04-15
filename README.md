@@ -7,7 +7,6 @@
 ## Details
 
 - **Language**: C++
-- **Course**: Object-Oriented Programming Practicum
 - **Institution**: Sveti Kliment Ohridski University in Sofia, Faculty of Mathematics and Informatics
 - **Academic Year**: 2023/2024
 
